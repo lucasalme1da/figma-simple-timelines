@@ -1,282 +1,261 @@
-const communityUrl =
-  "https://www.figma.com/community/search?query=Simple%20Timelines&resource_type=plugins";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { copy, locales, type Copy, type Locale } from "./content";
+
+const communityUrl = "https://www.figma.com/community/search?query=Simple%20Timelines&resource_type=plugins";
 const coffeeUrl = "https://www.buymeacoffee.com/";
+const githubUrl = "https://github.com/lucasalme1da";
 
-const features = [
-  {
-    number: "01",
-    title: "Timeline ou calendário",
-    text: "Escolha a visualização que melhor explica o seu projeto sem reconstruir tudo do zero.",
-  },
-  {
-    number: "02",
-    title: "Preview em tempo real",
-    text: "Veja o resultado mudar enquanto ajusta datas, textos, cores e atividades.",
-  },
-  {
-    number: "03",
-    title: "Atividades completas",
-    text: "Crie, duplique, exclua, reordene ou organize atividades automaticamente pela data inicial.",
-  },
-  {
-    number: "04",
-    title: "Eventos de um dia",
-    text: "Destaque entregas, reuniões e marcos com um losango fácil de reconhecer.",
-  },
-  {
-    number: "05",
-    title: "Cores sob controle",
-    text: "Defina uma cor para cada atividade e mantenha a leitura clara em todas as visualizações.",
-  },
-  {
-    number: "06",
-    title: "Semana do seu jeito",
-    text: "Comece a semana no domingo ou na segunda-feira, conforme o seu contexto.",
-  },
-  {
-    number: "07",
-    title: "15 idiomas",
-    text: "Gere rótulos e datas no idioma que seu time ou cliente precisa.",
-  },
-  {
-    number: "08",
-    title: "Edite quando precisar",
-    text: "Selecione uma timeline já criada, abra o plugin novamente e atualize os dados.",
-  },
-];
-
-const timelineRows = [
-  { className: "bar-purple", label: "Pesquisa e descoberta", date: "3–9 out" },
-  { className: "bar-blue", label: "UX e visual design", date: "7–15 out" },
-  { className: "bar-teal", label: "Desenvolvimento", date: "12–23 out" },
-  { className: "bar-orange", label: "QA e refinamentos", date: "21–28 out" },
-];
-
-const octoberDays = Array.from({ length: 31 }, (_, index) => index + 1);
-const novemberDays = Array.from({ length: 30 }, (_, index) => index + 1);
-
-function BrandMark({ small = false }: { small?: boolean }) {
-  return (
-    <span className={`brand-mark${small ? " brand-mark-small" : ""}`} aria-hidden="true">
-      <span />
-      <span />
-      <span />
-    </span>
-  );
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+  }
 }
 
-function ArrowIcon() {
-  return <span aria-hidden="true">↗</span>;
+function BrandMark() {
+  return <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>;
 }
 
-function TimelineExample() {
-  return (
-    <div className="artifact-window timeline-window" aria-label="Exemplo de timeline de lançamento de produto">
-      <div className="artifact-topbar">
-        <div className="artifact-caption">
-          <span>TIMELINE</span>
-          <i />
-          <span>03 OUT → 30 OUT</span>
-        </div>
-        <strong>Lançamento do produto</strong>
-      </div>
-      <div className="timeline-weeks" aria-hidden="true">
-        <span>3–9 out</span>
-        <span>10–16 out</span>
-        <span>17–23 out</span>
-        <span>24–30 out</span>
-      </div>
-      <div className="timeline-canvas">
-        <div className="timeline-lines" aria-hidden="true"><i /><i /><i /></div>
-        {timelineRows.map((row) => (
-          <div className={`timeline-bar ${row.className}`} key={row.label}>
-            <b>{row.label}</b>
-            <span>{row.date}</span>
-          </div>
-        ))}
-        <div className="timeline-milestone">
-          <i aria-hidden="true" />
-          <span><b>Lançamento</b>30 out</span>
-        </div>
-      </div>
-    </div>
-  );
+function detectLocale(): Locale {
+  const supported = locales.map(([locale]) => locale);
+  const candidates = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const candidate of candidates) {
+    const exact = supported.find((locale) => locale.toLowerCase() === candidate.toLowerCase());
+    if (exact) return exact;
+    const base = candidate.split("-")[0].toLowerCase();
+    const partial = supported.find((locale) => locale.toLowerCase().startsWith(`${base}-`));
+    if (partial) return partial;
+  }
+  return "en-US";
 }
 
-function CalendarMonth({
-  title,
-  days,
-  blanks,
-  variant,
-}: {
-  title: string;
-  days: number[];
-  blanks: number;
-  variant: "october" | "november";
-}) {
-  return (
-    <div className={`calendar-month ${variant}`}>
-      <div className="month-title"><span>2026</span><strong>{title}</strong></div>
-      <div className="weekdays" aria-hidden="true">
-        {['S', 'T', 'Q', 'Q', 'S', 'S', 'D'].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}
-      </div>
-      <div className="month-grid">
-        {Array.from({ length: blanks }, (_, index) => <span className="empty-day" key={`blank-${index}`} />)}
-        {days.map((day) => (
-          <span className={`day-cell${(day + blanks) % 7 === 0 || (day + blanks) % 7 === 6 ? " weekend" : ""}`} key={day}>
-            {day}
-            {variant === "october" && day === 30 && <i className="day-diamond" aria-hidden="true" />}
-          </span>
-        ))}
-        {variant === "october" ? (
-          <>
-            <span className="calendar-event event-purple"><b>Pesquisa</b></span>
-            <span className="calendar-event event-blue"><b>Design</b></span>
-            <span className="calendar-event event-teal"><b>Desenvolvimento</b></span>
-            <span className="calendar-event event-orange"><b>QA</b></span>
-          </>
-        ) : (
-          <>
-            <span className="calendar-event event-pink"><b>Lançamento</b></span>
-            <span className="calendar-event event-teal-next"><b>Acompanhamento</b></span>
-          </>
-        )}
-      </div>
-      <div className="calendar-legend">
-        <span><i className="dot purple" />Pesquisa</span>
-        <span><i className="dot teal" />Desenvolvimento</span>
-        {variant === "october" && <span className="legend-milestone"><i />Lançamento</span>}
-      </div>
-    </div>
-  );
+function startAnalytics(id: string) {
+  if (document.querySelector(`script[data-simple-timelines-ga="${id}"]`)) return;
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+  script.dataset.simpleTimelinesGa = id;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = (...args: unknown[]) => window.dataLayer?.push(args);
+  window.gtag("js", new Date());
+  window.gtag("config", id);
 }
 
-function CalendarExample() {
-  return (
-    <div className="calendar-artifact" aria-label="Exemplo de calendário de lançamento de produto">
-      <div className="calendar-artifact-header">
-        <div className="artifact-caption"><span>CALENDÁRIO</span><i /><span>OUT → NOV 2026</span></div>
-        <strong>Plano de lançamento</strong>
-      </div>
-      <div className="calendar-months">
-        <CalendarMonth title="Outubro" days={octoberDays} blanks={3} variant="october" />
-        <CalendarMonth title="Novembro" days={novemberDays} blanks={6} variant="november" />
-      </div>
-    </div>
-  );
+function trackInstall(location: string) {
+  window.gtag?.("event", "install_click", {
+    event_category: "engagement",
+    event_label: location,
+  });
 }
 
-function CommunityButton({ className = "" }: { className?: string }) {
+function InstallButton({ label, location, compact = false }: { label: string; location: string; compact?: boolean }) {
   return (
-    <a className={`button button-primary ${className}`} href={communityUrl} target="_blank" rel="noreferrer">
-      Instalar no Figma <ArrowIcon />
+    <a
+      className={`button button-primary${compact ? " button-compact" : ""}`}
+      href={communityUrl}
+      target="_blank"
+      rel="noreferrer"
+      onClick={() => trackInstall(location)}
+    >
+      {label}<span aria-hidden="true">↗</span>
     </a>
   );
 }
 
+function Screenshot({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
+  return <img src={src} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />;
+}
+
+function AnalyticsConsent({ t }: { t: Copy }) {
+  const [gaId, setGaId] = useState<string | null>(null);
+  const [decision, setDecision] = useState<"pending" | "granted" | "denied">("pending");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/analytics-config", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { id?: string | null }) => {
+        if (!active || !data.id) return;
+        setGaId(data.id);
+        const saved = localStorage.getItem("simple-timelines-analytics");
+        if (saved === "granted") {
+          setDecision("granted");
+          startAnalytics(data.id);
+        } else if (saved === "denied") {
+          setDecision("denied");
+        }
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  if (!gaId || decision !== "pending") return null;
+
+  return (
+    <aside className="analytics-consent" aria-label="Analytics consent">
+      <p>{t.analyticsText}</p>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem("simple-timelines-analytics", "granted");
+          setDecision("granted");
+          startAnalytics(gaId);
+        }}
+      >{t.analyticsAccept}</button>
+      <button
+        className="consent-secondary"
+        type="button"
+        onClick={() => {
+          localStorage.setItem("simple-timelines-analytics", "denied");
+          setDecision("denied");
+        }}
+      >{t.analyticsReject}</button>
+    </aside>
+  );
+}
+
 export default function Home() {
+  const [locale, setLocale] = useState<Locale>("en-US");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const t = copy[locale];
+  const currentLocale = useMemo(() => locales.find(([value]) => value === locale)!, [locale]);
+
+  useEffect(() => {
+    const savedLocale = localStorage.getItem("simple-timelines-locale") as Locale | null;
+    const isSupported = savedLocale && locales.some(([value]) => value === savedLocale);
+    setLocale(isSupported ? savedLocale : detectLocale());
+
+    const savedTheme = localStorage.getItem("simple-timelines-theme");
+    const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    setTheme(savedTheme === "dark" || savedTheme === "light" ? savedTheme : preferredTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === "ar-SA" ? "rtl" : "ltr";
+  }, [locale]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  const changeLocale = (nextLocale: Locale) => {
+    setLocale(nextLocale);
+    localStorage.setItem("simple-timelines-locale", nextLocale);
+  };
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("simple-timelines-theme", nextTheme);
+  };
+
   return (
     <main>
-      <nav className="site-nav" aria-label="Navegação principal">
-        <a className="brand" href="#top" aria-label="Simple Timelines — início">
-          <BrandMark small />
-          <span>Simple Timelines</span>
+      <nav className="site-nav" aria-label="Primary navigation">
+        <a className="brand" href="#top" aria-label="Simple Timelines home">
+          <BrandMark /><span>Simple Timelines</span><small>{t.beta}</small>
         </a>
         <div className="nav-links">
-          <a href="#recursos">Recursos</a>
-          <a href="#exemplos">Exemplos</a>
-          <CommunityButton className="nav-cta" />
+          <a href="#features">{t.navFeatures}</a>
+          <a href="#examples">{t.navExamples}</a>
+          <div className="nav-tools">
+            <label className="locale-picker" title={t.language}>
+              <span aria-hidden="true">{currentLocale[1]}</span>
+              <select value={locale} onChange={(event) => changeLocale(event.target.value as Locale)} aria-label={t.language}>
+                {locales.map(([value, flag, label]) => <option value={value} key={value}>{flag} {label}</option>)}
+              </select>
+            </label>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={t.theme} title={t.theme}>
+              <span aria-hidden="true">{theme === "light" ? "◐" : "☼"}</span>
+            </button>
+          </div>
+          <InstallButton label={t.install} location="navigation" compact />
         </div>
       </nav>
 
-      <section className="hero" id="top">
+      <section className="hero section" id="top">
         <div className="hero-copy">
-          <div className="eyebrow"><span /> Plugin para Figma</div>
-          <h1>Seu projeto,<br /><em>claro de verdade.</em></h1>
-          <p>Crie timelines e calendários bonitos, organizados e prontos para apresentar — sem montar cada bloco na mão.</p>
+          <span className="eyebrow"><i /> {t.eyebrow} · {t.beta}</span>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroBody}</p>
           <div className="hero-actions">
-            <CommunityButton />
-            <a className="text-link" href="#exemplos">Ver exemplos <span aria-hidden="true">↓</span></a>
+            <InstallButton label={t.install} location="hero" />
+            <a href="#examples" className="secondary-link">{t.seeExamples}<span aria-hidden="true">↓</span></a>
           </div>
-          <div className="hero-note">
-            <span>✓</span> Direto no seu arquivo do Figma
-            <span>✓</span> Resultado editável
-          </div>
+          <div className="hero-points"><span>✓ {t.heroPoint1}</span><span>✓ {t.heroPoint2}</span></div>
         </div>
+        <figure className="product-shot hero-shot">
+          <Screenshot src="/plugin-overview.png" alt={t.altOverview} priority />
+          <span className="shot-label shot-label-preview">01</span>
+          <span className="shot-label shot-label-settings">02</span>
+        </figure>
+      </section>
 
-        <div className="hero-visual" aria-hidden="true">
-          <div className="dot-field" />
-          <div className="plugin-panel">
-            <div className="panel-header"><BrandMark small /><b>Simple Timelines</b></div>
-            <div className="panel-step"><span>01</span><div><b>Detalhes da timeline</b><small>Defina o período e o idioma.</small></div></div>
-            <div className="segmented"><span className="active">Timeline</span><span>Calendário</span></div>
-            <label>Nome da timeline<span>Lançamento do produto</span></label>
-            <label>Descrição<span>PLANO DE PRODUTO</span></label>
-            <div className="mini-fields"><label>Data inicial<span>03/10/2026</span></label><label>Data final<span>30/10/2026</span></label></div>
-            <div className="panel-activity"><i /><b>Pesquisa e descoberta</b><span /></div>
-            <div className="panel-button">Criar timeline <b>→</b></div>
-          </div>
-          <div className="hero-preview-card">
-            <div className="mini-title"><small>PLANO DE PRODUTO</small><b>Lançamento do produto</b></div>
-            <div className="mini-weeks"><span>3–9</span><span>10–16</span><span>17–23</span><span>24–30</span></div>
-            <div className="mini-timeline">
-              <i className="mini-bar one" /><i className="mini-bar two" /><i className="mini-bar three" /><i className="mini-bar four" />
-              <i className="mini-diamond" />
-            </div>
-          </div>
-          <div className="floating-badge"><span>✓</span> Pronto no Figma</div>
+      <section className="guided section">
+        <div className="guided-copy">
+          <span className="kicker">{t.setupKicker}</span>
+          <h2>{t.setupTitle}</h2>
+          <p>{t.setupBody}</p>
+          <ol className="detail-list">
+            {t.setupPoints.map((point, index) => <li key={point}><span>{String(index + 1).padStart(2, "0")}</span>{point}</li>)}
+          </ol>
+        </div>
+        <figure className="product-shot annotated-shot">
+          <Screenshot src="/plugin-overview.png" alt={t.altOverview} />
+          <span className="shot-label setup-one">01</span>
+          <span className="shot-label setup-two">02</span>
+          <span className="shot-label setup-three">03</span>
+        </figure>
+      </section>
+
+      <section className="guided guided-reverse section">
+        <figure className="product-shot annotated-shot activities-shot">
+          <Screenshot src="/plugin-activities.png" alt={t.altActivities} />
+          <span className="shot-label activity-one">01</span>
+          <span className="shot-label activity-two">02</span>
+          <span className="shot-label activity-three">03</span>
+        </figure>
+        <div className="guided-copy">
+          <span className="kicker">{t.activitiesKicker}</span>
+          <h2>{t.activitiesTitle}</h2>
+          <p>{t.activitiesBody}</p>
+          <ol className="detail-list">
+            {t.activitiesPoints.map((point, index) => <li key={point}><span>{String(index + 1).padStart(2, "0")}</span>{point}</li>)}
+          </ol>
         </div>
       </section>
 
-      <section className="benefit-strip" aria-label="Principais benefícios">
-        <div><strong>2</strong><span>visualizações<br />completas</span></div>
-        <div><strong>15</strong><span>idiomas<br />disponíveis</span></div>
-        <div><strong>1</strong><span>plugin para<br />organizar tudo</span></div>
-      </section>
-
-      <section className="workflow section-pad">
-        <div className="section-intro centered">
-          <span className="section-kicker">Simples por escolha</span>
-          <h2>Do planejamento ao canvas<br />em três passos.</h2>
-        </div>
-        <div className="steps">
-          <article><span>01</span><div className="step-icon calendar-icon"><i /><i /></div><h3>Defina o período</h3><p>Escolha as datas, o idioma e o início da semana.</p></article>
-          <article><span>02</span><div className="step-icon list-icon"><i /><i /><i /></div><h3>Adicione atividades</h3><p>Organize tarefas, fases e marcos com suas próprias cores.</p></article>
-          <article><span>03</span><div className="step-icon spark-icon"><i /><i /><i /></div><h3>Crie no Figma</h3><p>Revise o preview e gere o artefato pronto no canvas.</p></article>
-        </div>
-      </section>
-
-      <section className="examples section-pad" id="exemplos">
-        <div className="example-block">
-          <div className="example-copy">
-            <span className="section-kicker">Visualização 01</span>
-            <h2>Timeline para enxergar o fluxo.</h2>
-            <p>Perfeita para roadmaps, lançamentos, sprints e qualquer plano em que duração e sequência importam.</p>
-            <ul><li>Períodos organizados por semana</li><li>Atividades em faixas coloridas</li><li>Marcos de um dia em destaque</li></ul>
-          </div>
-          <TimelineExample />
-        </div>
-        <div className="example-block calendar-block">
-          <CalendarExample />
-          <div className="example-copy">
-            <span className="section-kicker">Visualização 02</span>
-            <h2>Calendário para ver cada data.</h2>
-            <p>Ideal para calendários editoriais, campanhas e planejamentos que precisam de leitura diária.</p>
-            <ul><li>Até 12 meses por calendário</li><li>Finais de semana identificados</li><li>Legenda automática de atividades</li></ul>
-          </div>
+      <section className="examples section" id="examples">
+        <header className="section-heading">
+          <span className="kicker">{t.examplesKicker}</span>
+          <h2>{t.examplesTitle}</h2>
+        </header>
+        <div className="example-list">
+          <article>
+            <div className="example-caption"><span>01</span><div><h3>{t.timelineTitle}</h3><p>{t.timelineText}</p></div></div>
+            <figure className="artifact-shot"><Screenshot src="/timeline-example.png" alt={t.altTimeline} /></figure>
+          </article>
+          <article>
+            <div className="example-caption"><span>02</span><div><h3>{t.calendarTitle}</h3><p>{t.calendarText}</p></div></div>
+            <figure className="artifact-shot calendar-shot"><Screenshot src="/calendar-example.png" alt={t.altCalendar} /></figure>
+          </article>
         </div>
       </section>
 
-      <section className="features section-pad" id="recursos">
-        <div className="section-intro">
-          <span className="section-kicker">Tudo que importa</span>
-          <h2>Menos trabalho manual.<br />Mais clareza.</h2>
-          <p>Os controles certos para criar, ajustar e apresentar seu planejamento sem complicação.</p>
-        </div>
+      <section className="feature-section section" id="features">
+        <header className="section-heading compact-heading">
+          <span className="kicker">{t.featuresKicker}</span>
+          <h2>{t.featuresTitle}</h2>
+          <p>{t.featuresBody}</p>
+        </header>
         <div className="feature-grid">
-          {features.map((feature) => (
-            <article key={feature.number}>
-              <span>{feature.number}</span>
+          {t.features.map((feature, index) => (
+            <article key={feature.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
               <h3>{feature.title}</h3>
               <p>{feature.text}</p>
             </article>
@@ -284,45 +263,27 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="edit-section section-pad">
-        <div className="edit-card">
-          <div className="edit-visual" aria-hidden="true">
-            <div className="select-outline"><span>Simple Timeline</span><i /><i /><i /><i /></div>
-            <div className="edit-pill"><b>↻</b> Editar timeline</div>
-          </div>
-          <div className="edit-copy">
-            <span className="section-kicker">Nada fica engessado</span>
-            <h2>Mudou o plano?<br />Atualize o resultado.</h2>
-            <p>Selecione uma timeline criada pelo plugin e abra o Simple Timelines novamente. Seus dados voltam para o editor, prontos para ajustar.</p>
-          </div>
+      <aside className="beta-note section">
+        <span className="beta-pill">{t.beta}</span>
+        <div><h2>{t.betaTitle}</h2><p>{t.betaText}</p></div>
+      </aside>
+
+      <section className="final-cta section">
+        <BrandMark />
+        <h2>{t.finalTitle}</h2>
+        <p>{t.finalBody}</p>
+        <InstallButton label={t.install} location="final_cta" />
+      </section>
+
+      <footer className="site-footer section">
+        <div className="footer-brand"><BrandMark /><span>Simple Timelines <small>{t.beta}</small></span></div>
+        <div className="footer-links">
+          <a className="coffee-link" href={coffeeUrl} target="_blank" rel="noreferrer">☕ {t.coffee}</a>
+          <span>{t.madeWith} <a href={githubUrl} target="_blank" rel="noreferrer">@lucasalme1da</a> ♥</span>
         </div>
-      </section>
-
-      <section className="coffee section-pad">
-        <div className="coffee-card">
-          <div className="coffee-cup" aria-hidden="true"><span>☕</span><i /></div>
-          <div>
-            <span className="section-kicker">Feito com carinho (e cafeína)</span>
-            <h2>Curtiu o plugin?<br />Me paga um café hehe :P</h2>
-            <p>Seu apoio ajuda a manter o Simple Timelines evoluindo.</p>
-          </div>
-          <a className="button coffee-button" href={coffeeUrl} target="_blank" rel="noreferrer">Buy me a coffee <ArrowIcon /></a>
-        </div>
-      </section>
-
-      <section className="final-cta section-pad">
-        <div className="final-mark"><BrandMark /></div>
-        <span className="section-kicker">Seu próximo planejamento começa aqui</span>
-        <h2>Transforme datas em uma<br />história fácil de entender.</h2>
-        <p>Abra no Figma, organize o projeto e crie sua primeira timeline.</p>
-        <CommunityButton />
-      </section>
-
-      <footer className="site-footer">
-        <a className="brand" href="#top"><BrandMark small /><span>Simple Timelines</span></a>
-        <p>Timelines e calendários, sem complicação.</p>
-        <a href={communityUrl} target="_blank" rel="noreferrer">Figma Community <ArrowIcon /></a>
       </footer>
+
+      <AnalyticsConsent t={t} />
     </main>
   );
 }
