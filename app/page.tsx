@@ -127,29 +127,6 @@ export default function Home() {
   const localeMenuRef = useRef<HTMLDetailsElement>(null);
   const t = copy[locale];
   const currentLocale = useMemo(() => locales.find(([value]) => value === locale)!, [locale]);
-  const featureStories = useMemo(() => [
-    {
-      title: `${t.features[0].title} ↔ ${t.features[1].title}`,
-      paragraphs: [
-        `${t.features[0].text} ${t.features[1].text}`,
-        `${t.features[5].title}: ${t.features[5].text} ${t.features[6].title}: ${t.features[6].text}`,
-      ],
-    },
-    {
-      title: `${t.features[2].title} · ${t.features[3].title}`,
-      paragraphs: [
-        `${t.features[2].text} ${t.features[3].text}`,
-        `${t.features[4].title}: ${t.features[4].text}`,
-      ],
-    },
-    {
-      title: t.features[8].title,
-      paragraphs: [
-        `${t.features[7].text} ${t.features[8].text}`,
-        `${t.features[9].title}: ${t.features[9].text}`,
-      ],
-    },
-  ], [t]);
 
   useEffect(() => {
     const savedLocale = localStorage.getItem("simple-timelines-locale") as Locale | null;
@@ -223,13 +200,12 @@ export default function Home() {
           <BrandMark /><span>Simple Timelines</span><small>{t.beta}</small>
         </a>
         <div className="nav-links">
-          <a href="#features">{t.navFeatures}</a>
           <a href="#examples">{t.navExamples}</a>
           <div className="nav-tools">
             <details className="locale-menu" ref={localeMenuRef}>
               <summary aria-label={t.language} title={t.language}>
                 <FlagIcon country={currentLocale[1]} />
-                <span className="locale-code">{locale.split("-")[0].toUpperCase()}</span>
+                <span className="locale-code">{currentLocale[1].toUpperCase()}</span>
                 <span className="locale-chevron" aria-hidden="true">⌄</span>
               </summary>
               <div className="locale-options" role="listbox" aria-label={t.language}>
@@ -271,8 +247,6 @@ export default function Home() {
         </div>
         <figure className="product-shot hero-shot">
           <Screenshot src="/plugin-overview.png" alt={t.altOverview} priority />
-          <span className="shot-label shot-label-preview">01</span>
-          <span className="shot-label shot-label-settings">02</span>
         </figure>
       </section>
 
@@ -287,18 +261,12 @@ export default function Home() {
         </div>
         <figure className="product-shot annotated-shot">
           <Screenshot src="/plugin-overview.png" alt={t.altOverview} />
-          <span className="shot-label setup-one">01</span>
-          <span className="shot-label setup-two">02</span>
-          <span className="shot-label setup-three">03</span>
         </figure>
       </section>
 
       <section className="guided guided-reverse section reveal">
         <figure className="product-shot annotated-shot activities-shot">
           <Screenshot src="/plugin-activities.png" alt={t.altActivities} />
-          <span className="shot-label activity-one">01</span>
-          <span className="shot-label activity-two">02</span>
-          <span className="shot-label activity-three">03</span>
         </figure>
         <div className="guided-copy">
           <span className="kicker">{t.activitiesKicker}</span>
@@ -324,25 +292,6 @@ export default function Home() {
             <div className="example-caption"><span>02</span><div><h3>{t.calendarTitle}</h3><p>{t.calendarText}</p></div></div>
             <figure className="artifact-shot calendar-shot"><Screenshot src="/calendar-example.png" alt={t.altCalendar} /></figure>
           </article>
-        </div>
-      </section>
-
-      <section className="feature-section section reveal" id="features">
-        <header className="section-heading compact-heading">
-          <span className="kicker">{t.featuresKicker}</span>
-          <h2>{t.featuresTitle}</h2>
-          <p>{t.featuresBody}</p>
-        </header>
-        <div className="feature-story-list">
-          {featureStories.map((story, index) => (
-            <article className={`feature-story story-${index + 1}`} key={story.title}>
-              <span className="story-number">{String(index + 1).padStart(2, "0")}</span>
-              <h3>{story.title}</h3>
-              <div className="story-copy">
-                {story.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-              </div>
-            </article>
-          ))}
         </div>
       </section>
 
