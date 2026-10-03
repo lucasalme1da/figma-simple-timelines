@@ -42,8 +42,11 @@ export default defineConfig(async () => {
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.
   const { cloudflare } = await import("@cloudflare/vite-plugin");
+  const configuredSiteUrl = process.env.SITE_URL?.trim() || process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const base = configuredSiteUrl ? new URL(configuredSiteUrl).pathname : "/";
 
   return {
+    base: base.endsWith("/") ? base : `${base}/`,
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,

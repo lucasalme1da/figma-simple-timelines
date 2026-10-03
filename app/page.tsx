@@ -18,8 +18,18 @@ function BrandMark() {
   return <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>;
 }
 
-function FlagIcon({ country }: { country: string }) {
-  return <img className="flag-icon" src={`/flags/${country}.svg`} alt="" aria-hidden="true" />;
+function FlagIcon({ country, eager = false }: { country: string; eager?: boolean }) {
+  return (
+    <img
+      className="flag-icon"
+      src={`flags/${country}.svg`}
+      alt=""
+      aria-hidden="true"
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      fetchPriority={eager ? "high" : "low"}
+    />
+  );
 }
 
 function detectLocale(): Locale {
@@ -79,7 +89,7 @@ function AnalyticsConsent({ t }: { t: Copy }) {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/analytics-config", { cache: "no-store" })
+    fetch("api/analytics-config", { cache: "no-store" })
       .then((response) => response.json())
       .then((data: { id?: string | null }) => {
         if (!active || !data.id) return;
@@ -204,7 +214,7 @@ export default function Home() {
           <div className="nav-tools">
             <details className="locale-menu" ref={localeMenuRef}>
               <summary aria-label={t.language} title={t.language}>
-                <FlagIcon country={currentLocale[1]} />
+                <FlagIcon country={currentLocale[1]} eager />
                 <span className="locale-code">{currentLocale[1].toUpperCase()}</span>
                 <span className="locale-chevron" aria-hidden="true">⌄</span>
               </summary>
@@ -246,7 +256,7 @@ export default function Home() {
           <div className="hero-points"><span>✓ {t.heroPoint1}</span><span>✓ {t.heroPoint2}</span></div>
         </div>
         <figure className="product-shot hero-shot">
-          <Screenshot src="/plugin-overview.png" alt={t.altOverview} priority />
+          <Screenshot src="plugin-overview.png" alt={t.altOverview} priority />
         </figure>
       </section>
 
@@ -260,13 +270,13 @@ export default function Home() {
           </ol>
         </div>
         <figure className="product-shot annotated-shot">
-          <Screenshot src="/plugin-overview.png" alt={t.altOverview} />
+          <Screenshot src="plugin-overview.png" alt={t.altOverview} />
         </figure>
       </section>
 
       <section className="guided guided-reverse section reveal">
         <figure className="product-shot annotated-shot activities-shot">
-          <Screenshot src="/plugin-activities.png" alt={t.altActivities} />
+          <Screenshot src="plugin-activities.png" alt={t.altActivities} />
         </figure>
         <div className="guided-copy">
           <span className="kicker">{t.activitiesKicker}</span>
@@ -286,11 +296,11 @@ export default function Home() {
         <div className="example-list">
           <article>
             <div className="example-caption"><span>01</span><div><h3>{t.timelineTitle}</h3><p>{t.timelineText}</p></div></div>
-            <figure className="artifact-shot"><Screenshot src="/timeline-example.png" alt={t.altTimeline} /></figure>
+            <figure className="artifact-shot"><Screenshot src="timeline-example.png" alt={t.altTimeline} /></figure>
           </article>
           <article>
             <div className="example-caption"><span>02</span><div><h3>{t.calendarTitle}</h3><p>{t.calendarText}</p></div></div>
-            <figure className="artifact-shot calendar-shot"><Screenshot src="/calendar-example.png" alt={t.altCalendar} /></figure>
+            <figure className="artifact-shot calendar-shot"><Screenshot src="calendar-example.png" alt={t.altCalendar} /></figure>
           </article>
         </div>
       </section>
