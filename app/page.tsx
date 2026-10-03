@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { copy, locales, type Copy, type Locale } from "./content";
 
 const communityUrl = "https://www.figma.com/community/search?query=Simple%20Timelines&resource_type=plugins";
@@ -120,8 +120,32 @@ function AnalyticsConsent({ t }: { t: Copy }) {
 export default function Home() {
   const [locale, setLocale] = useState<Locale>("en-US");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const localeMenuRef = useRef<HTMLDetailsElement>(null);
   const t = copy[locale];
   const currentLocale = useMemo(() => locales.find(([value]) => value === locale)!, [locale]);
+  const featureStories = useMemo(() => [
+    {
+      title: `${t.features[0].title} ↔ ${t.features[1].title}`,
+      paragraphs: [
+        `${t.features[0].text} ${t.features[1].text}`,
+        `${t.features[5].title}: ${t.features[5].text} ${t.features[6].title}: ${t.features[6].text}`,
+      ],
+    },
+    {
+      title: `${t.features[2].title} · ${t.features[3].title}`,
+      paragraphs: [
+        `${t.features[2].text} ${t.features[3].text}`,
+        `${t.features[4].title}: ${t.features[4].text}`,
+      ],
+    },
+    {
+      title: t.features[8].title,
+      paragraphs: [
+        `${t.features[7].text} ${t.features[8].text}`,
+        `${t.features[9].title}: ${t.features[9].text}`,
+      ],
+    },
+  ], [t]);
 
   useEffect(() => {
     const savedLocale = localStorage.getItem("simple-timelines-locale") as Locale | null;
@@ -141,6 +165,41 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const closeMenu = (event: PointerEvent) => {
+      if (localeMenuRef.current && !localeMenuRef.current.contains(event.target as Node)) {
+        localeMenuRef.current.open = false;
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && localeMenuRef.current) localeMenuRef.current.open = false;
+    };
+    document.addEventListener("pointerdown", closeMenu);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeMenu);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -45px" });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
   const changeLocale = (nextLocale: Locale) => {
     setLocale(nextLocale);
@@ -163,12 +222,30 @@ export default function Home() {
           <a href="#features">{t.navFeatures}</a>
           <a href="#examples">{t.navExamples}</a>
           <div className="nav-tools">
-            <label className="locale-picker" title={t.language}>
-              <span aria-hidden="true">{currentLocale[1]}</span>
-              <select value={locale} onChange={(event) => changeLocale(event.target.value as Locale)} aria-label={t.language}>
-                {locales.map(([value, flag, label]) => <option value={value} key={value}>{flag} {label}</option>)}
-              </select>
-            </label>
+            <details className="locale-menu" ref={localeMenuRef}>
+              <summary aria-label={t.language} title={t.language}>
+                <span className="current-flag" aria-hidden="true">{currentLocale[1]}</span>
+                <span className="locale-code">{locale.split("-")[0].toUpperCase()}</span>
+                <span className="locale-chevron" aria-hidden="true">⌄</span>
+              </summary>
+              <div className="locale-options" role="listbox" aria-label={t.language}>
+                {locales.map(([value, flag, label]) => (
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={value === locale}
+                    className={value === locale ? "active" : ""}
+                    onClick={() => {
+                      changeLocale(value);
+                      if (localeMenuRef.current) localeMenuRef.current.open = false;
+                    }}
+                    key={value}
+                  >
+                    <span aria-hidden="true">{flag}</span><span>{label}</span>{value === locale && <i aria-hidden="true">✓</i>}
+                  </button>
+                ))}
+              </div>
+            </details>
             <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={t.theme} title={t.theme}>
               <span aria-hidden="true">{theme === "light" ? "◐" : "☼"}</span>
             </button>
@@ -177,7 +254,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="hero section" id="top">
+      <section className="hero section hero-enter" id="top">
         <div className="hero-copy">
           <span className="eyebrow"><i /> {t.eyebrow} · {t.beta}</span>
           <h1>{t.heroTitle}</h1>
@@ -195,7 +272,7 @@ export default function Home() {
         </figure>
       </section>
 
-      <section className="guided section">
+      <section className="guided section reveal">
         <div className="guided-copy">
           <span className="kicker">{t.setupKicker}</span>
           <h2>{t.setupTitle}</h2>
@@ -212,7 +289,7 @@ export default function Home() {
         </figure>
       </section>
 
-      <section className="guided guided-reverse section">
+      <section className="guided guided-reverse section reveal">
         <figure className="product-shot annotated-shot activities-shot">
           <Screenshot src="/plugin-activities.png" alt={t.altActivities} />
           <span className="shot-label activity-one">01</span>
@@ -229,7 +306,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="examples section" id="examples">
+      <section className="examples section reveal" id="examples">
         <header className="section-heading">
           <span className="kicker">{t.examplesKicker}</span>
           <h2>{t.examplesTitle}</h2>
@@ -246,29 +323,31 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="feature-section section" id="features">
+      <section className="feature-section section reveal" id="features">
         <header className="section-heading compact-heading">
           <span className="kicker">{t.featuresKicker}</span>
           <h2>{t.featuresTitle}</h2>
           <p>{t.featuresBody}</p>
         </header>
-        <div className="feature-grid">
-          {t.features.map((feature, index) => (
-            <article key={feature.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <h3>{feature.title}</h3>
-              <p>{feature.text}</p>
+        <div className="feature-story-list">
+          {featureStories.map((story, index) => (
+            <article className={`feature-story story-${index + 1}`} key={story.title}>
+              <span className="story-number">{String(index + 1).padStart(2, "0")}</span>
+              <h3>{story.title}</h3>
+              <div className="story-copy">
+                {story.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              </div>
             </article>
           ))}
         </div>
       </section>
 
-      <aside className="beta-note section">
+      <aside className="beta-note section reveal">
         <span className="beta-pill">{t.beta}</span>
         <div><h2>{t.betaTitle}</h2><p>{t.betaText}</p></div>
       </aside>
 
-      <section className="final-cta section">
+      <section className="final-cta section reveal">
         <BrandMark />
         <h2>{t.finalTitle}</h2>
         <p>{t.finalBody}</p>
