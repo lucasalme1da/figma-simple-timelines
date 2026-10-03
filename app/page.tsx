@@ -18,6 +18,10 @@ function BrandMark() {
   return <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>;
 }
 
+function FlagIcon({ country }: { country: string }) {
+  return <img className="flag-icon" src={`/flags/${country}.svg`} alt="" aria-hidden="true" />;
+}
+
 function detectLocale(): Locale {
   const supported = locales.map(([locale]) => locale);
   const candidates = navigator.languages?.length ? navigator.languages : [navigator.language];
@@ -224,12 +228,12 @@ export default function Home() {
           <div className="nav-tools">
             <details className="locale-menu" ref={localeMenuRef}>
               <summary aria-label={t.language} title={t.language}>
-                <span className="current-flag" aria-hidden="true">{currentLocale[1]}</span>
+                <FlagIcon country={currentLocale[1]} />
                 <span className="locale-code">{locale.split("-")[0].toUpperCase()}</span>
                 <span className="locale-chevron" aria-hidden="true">⌄</span>
               </summary>
               <div className="locale-options" role="listbox" aria-label={t.language}>
-                {locales.map(([value, flag, label]) => (
+                {locales.map(([value, country, label]) => (
                   <button
                     type="button"
                     role="option"
@@ -241,7 +245,7 @@ export default function Home() {
                     }}
                     key={value}
                   >
-                    <span aria-hidden="true">{flag}</span><span>{label}</span>{value === locale && <i aria-hidden="true">✓</i>}
+                    <FlagIcon country={country} /><span>{label}</span>{value === locale && <i aria-hidden="true">✓</i>}
                   </button>
                 ))}
               </div>

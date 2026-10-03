@@ -105,7 +105,15 @@ img { display: block; max-width: 100%; }
   list-style: none;
 }
 .locale-menu summary::-webkit-details-marker { display: none; }
-.current-flag { font-size: 16px; line-height: 1; }
+.flag-icon {
+  display: block;
+  width: 20px;
+  height: 15px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent);
+}
 .locale-code { color: var(--text); font-size: 9px; font-weight: 900; letter-spacing: .05em; }
 .locale-chevron { color: var(--muted); font-size: 11px; transition: transform .18s ease; }
 .locale-menu[open] .locale-chevron { transform: rotate(180deg); }
@@ -141,7 +149,7 @@ img { display: block; max-width: 100%; }
   font-size: 11px;
   text-align: start;
 }
-.locale-options button > span:first-child { font-size: 16px; }
+.locale-options button > .flag-icon { justify-self: center; }
 .locale-options button i { color: var(--purple-text); font-style: normal; font-weight: 900; }
 .locale-options button:hover, .locale-options button.active { background: var(--surface-soft); }
 .theme-toggle {
