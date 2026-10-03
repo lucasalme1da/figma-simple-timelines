@@ -1,37 +1,8 @@
-"use client";
-
 import { useEffect, useMemo, useRef, useState } from "react";
-import { copy, locales, type Copy, type Locale } from "./content";
-
-const communityUrl = "https://www.figma.com/community/search?query=Simple%20Timelines&resource_type=plugins";
-const coffeeUrl = "https://www.buymeacoffee.com/";
-const githubUrl = "https://github.com/lucasalme1da";
-const analyticsId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() || "G-7C9VET7EY9";
-
-declare global {
-  interface Window {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  }
-}
-
-function BrandMark() {
-  return <span className="brand-mark" aria-hidden="true"><span /><span /><span /></span>;
-}
-
-function FlagIcon({ country, eager = false }: { country: string; eager?: boolean }) {
-  return (
-    <img
-      className="flag-icon"
-      src={`flags/${country}.svg`}
-      alt=""
-      aria-hidden="true"
-      loading={eager ? "eager" : "lazy"}
-      decoding="async"
-      fetchPriority={eager ? "high" : "low"}
-    />
-  );
-}
+import { AnalyticsConsent } from "./components/AnalyticsConsent";
+import { BrandMark, FlagIcon, InstallButton, Screenshot } from "./components/Ui";
+import { coffeeUrl, githubUrl } from "./config";
+import { copy, locales, type Locale } from "./content";
 
 function detectLocale(): Locale {
   const supported = locales.map(([locale]) => locale);
@@ -46,83 +17,7 @@ function detectLocale(): Locale {
   return "en-US";
 }
 
-function startAnalytics(id: string) {
-  if (document.querySelector(`script[data-simple-timelines-ga="${id}"]`)) return;
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
-  script.dataset.simpleTimelinesGa = id;
-  document.head.appendChild(script);
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = (...args: unknown[]) => window.dataLayer?.push(args);
-  window.gtag("js", new Date());
-  window.gtag("config", id);
-}
-
-function trackInstall(location: string) {
-  window.gtag?.("event", "install_click", {
-    event_category: "engagement",
-    event_label: location,
-  });
-}
-
-function InstallButton({ label, location, compact = false }: { label: string; location: string; compact?: boolean }) {
-  return (
-    <a
-      className={`button button-primary${compact ? " button-compact" : ""}`}
-      href={communityUrl}
-      target="_blank"
-      rel="noreferrer"
-      onClick={() => trackInstall(location)}
-    >
-      {label}<span aria-hidden="true">↗</span>
-    </a>
-  );
-}
-
-function Screenshot({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
-  return <img src={src} alt={alt} loading={priority ? "eager" : "lazy"} decoding="async" />;
-}
-
-function AnalyticsConsent({ t }: { t: Copy }) {
-  const [decision, setDecision] = useState<"pending" | "granted" | "denied">("pending");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("simple-timelines-analytics");
-    if (saved === "granted") {
-      setDecision("granted");
-      startAnalytics(analyticsId);
-    } else if (saved === "denied") {
-      setDecision("denied");
-    }
-  }, []);
-
-  if (decision !== "pending") return null;
-
-  return (
-    <aside className="analytics-consent" aria-label="Analytics consent">
-      <p>{t.analyticsText}</p>
-      <button
-        type="button"
-        onClick={() => {
-          localStorage.setItem("simple-timelines-analytics", "granted");
-          setDecision("granted");
-          startAnalytics(analyticsId);
-        }}
-      >{t.analyticsAccept}</button>
-      <button
-        className="consent-secondary"
-        type="button"
-        onClick={() => {
-          localStorage.setItem("simple-timelines-analytics", "denied");
-          setDecision("denied");
-        }}
-      >{t.analyticsReject}</button>
-    </aside>
-  );
-}
-
-export default function Home() {
+export default function App() {
   const [locale, setLocale] = useState<Locale>("en-US");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const localeMenuRef = useRef<HTMLDetailsElement>(null);
@@ -142,7 +37,9 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar-SA" ? "rtl" : "ltr";
-  }, [locale]);
+    document.title = `${t.heroTitle} — Simple Timelines`;
+    document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", t.heroBody);
+  }, [locale, t]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -316,7 +213,7 @@ export default function Home() {
         </div>
       </footer>
 
-      <AnalyticsConsent t={t} />
+      <AnalyticsConsent copy={t} />
     </main>
   );
 }
