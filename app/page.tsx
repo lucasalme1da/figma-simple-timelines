@@ -6,6 +6,7 @@ import { copy, locales, type Copy, type Locale } from "./content";
 const communityUrl = "https://www.figma.com/community/search?query=Simple%20Timelines&resource_type=plugins";
 const coffeeUrl = "https://www.buymeacoffee.com/";
 const githubUrl = "https://github.com/lucasalme1da";
+const analyticsId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() || "G-7C9VET7EY9";
 
 declare global {
   interface Window {
@@ -84,29 +85,19 @@ function Screenshot({ src, alt, priority = false }: { src: string; alt: string; 
 }
 
 function AnalyticsConsent({ t }: { t: Copy }) {
-  const [gaId, setGaId] = useState<string | null>(null);
   const [decision, setDecision] = useState<"pending" | "granted" | "denied">("pending");
 
   useEffect(() => {
-    let active = true;
-    fetch("api/analytics-config", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((data: { id?: string | null }) => {
-        if (!active || !data.id) return;
-        setGaId(data.id);
-        const saved = localStorage.getItem("simple-timelines-analytics");
-        if (saved === "granted") {
-          setDecision("granted");
-          startAnalytics(data.id);
-        } else if (saved === "denied") {
-          setDecision("denied");
-        }
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
+    const saved = localStorage.getItem("simple-timelines-analytics");
+    if (saved === "granted") {
+      setDecision("granted");
+      startAnalytics(analyticsId);
+    } else if (saved === "denied") {
+      setDecision("denied");
+    }
   }, []);
 
-  if (!gaId || decision !== "pending") return null;
+  if (decision !== "pending") return null;
 
   return (
     <aside className="analytics-consent" aria-label="Analytics consent">
@@ -116,7 +107,7 @@ function AnalyticsConsent({ t }: { t: Copy }) {
         onClick={() => {
           localStorage.setItem("simple-timelines-analytics", "granted");
           setDecision("granted");
-          startAnalytics(gaId);
+          startAnalytics(analyticsId);
         }}
       >{t.analyticsAccept}</button>
       <button
