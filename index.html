@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f7fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121118" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="author" content="Lucas de Almeida" />
+    <meta name="application-name" content="Simple Timelines" />
+    <meta
+      name="description"
+      content="Create editable project timelines and multi-month calendars directly in Figma. Preview dates, milestones, and activities before adding them to your file."
+    />
+
+    <title>Simple Timelines — Figma Timeline &amp; Calendar Plugin</title>
+    <link rel="canonical" href="https://lucasalme1da.github.io/figma-simple-timelines/" />
+    <link rel="icon" href="plugin-icon-128.png" sizes="128x128" type="image/png" />
+    <link rel="apple-touch-icon" href="plugin-icon-128.png" sizes="128x128" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Simple Timelines" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Simple Timelines — Figma Timeline &amp; Calendar Plugin" />
+    <meta
+      property="og:description"
+      content="Create editable project timelines and multi-month calendars directly in Figma. Preview dates, milestones, and activities before adding them to your file."
+    />
+    <meta property="og:url" content="https://lucasalme1da.github.io/figma-simple-timelines/" />
+    <meta property="og:image" content="https://lucasalme1da.github.io/figma-simple-timelines/og-v2.png" />
+    <meta property="og:image:width" content="1672" />
+    <meta property="og:image:height" content="941" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="A project timeline and calendar created with the Simple Timelines Figma plugin" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Simple Timelines — Figma Timeline &amp; Calendar Plugin" />
+    <meta
+      name="twitter:description"
+      content="Create editable project timelines and multi-month calendars directly in Figma. Preview dates, milestones, and activities before adding them to your file."
+    />
+    <meta name="twitter:image" content="https://lucasalme1da.github.io/figma-simple-timelines/og-v2.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://lucasalme1da.github.io/figma-simple-timelines/#website",
+            "name": "Simple Timelines",
+            "url": "https://lucasalme1da.github.io/figma-simple-timelines/",
+            "description": "Create editable project timelines and multi-month calendars directly in Figma.",
+            "inLanguage": ["en-US", "pt-BR", "es-ES", "fr-FR", "de-DE", "it-IT", "nl-NL", "pl-PL", "tr-TR", "ru-RU", "ar-SA", "hi-IN", "zh-CN", "ja-JP", "ko-KR"],
+            "publisher": { "@id": "https://lucasalme1da.github.io/figma-simple-timelines/#creator" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://lucasalme1da.github.io/figma-simple-timelines/#plugin",
+            "name": "Simple Timelines",
+            "url": "https://lucasalme1da.github.io/figma-simple-timelines/",
+            "description": "Create editable project timelines and multi-month calendars directly in Figma.",
+            "applicationCategory": "DesignApplication",
+            "applicationSubCategory": "Figma plugin",
+            "operatingSystem": "Figma",
+            "image": "https://lucasalme1da.github.io/figma-simple-timelines/og-v2.png",
+            "screenshot": ["https://lucasalme1da.github.io/figma-simple-timelines/timeline-example.png", "https://lucasalme1da.github.io/figma-simple-timelines/calendar-example.png"],
+            "author": { "@id": "https://lucasalme1da.github.io/figma-simple-timelines/#creator" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://lucasalme1da.github.io/figma-simple-timelines/#creator",
+            "name": "Lucas de Almeida",
+            "url": "https://github.com/lucasalme1da",
+            "sameAs": ["https://github.com/lucasalme1da"]
+          }
+        ]
+      }
+    </script>
+    <script>
+      try {
+        let theme = localStorage.getItem("simple-timelines-theme");
+        if (theme !== "light" && theme !== "dark") {
+          theme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="./assets/index-DtM_TL0g.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BA-x6y8N.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

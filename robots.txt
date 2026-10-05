@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://lucasalme1da.github.io/figma-simple-timelines/sitemap.xml
+Host: https://lucasalme1da.github.io
