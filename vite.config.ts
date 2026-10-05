@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
   const siteUrl = normalizeSiteUrl(env.VITE_SITE_URL?.trim() || fallbackSiteUrl);
 
   return {
-    base: siteUrl.pathname,
+    base: "./",
     plugins: [react(), injectSiteUrl(siteUrl)],
   };
 });
